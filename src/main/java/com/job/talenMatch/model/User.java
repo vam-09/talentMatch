@@ -1,21 +1,20 @@
 package com.job.talenMatch.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.ZonedDateTime;
 
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
+@Data
+@Builder
+@Getter
+@Setter
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,9 +34,7 @@ public class User {
     @Column(nullable = false)
     private UserRole role;
 
-    @CreationTimestamp
     private ZonedDateTime createdAt;
 
-    @UpdateTimestamp
     private ZonedDateTime updatedAt;
 }
