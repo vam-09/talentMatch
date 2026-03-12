@@ -1,4 +1,4 @@
-package com.job.talentMatch;
+package com.job.talenMatch;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -10,6 +10,8 @@ public class TalentMatchApplication {
 
 	public static void main(String[] args) {
 //		log.info("inside the function");
+
+
 		SpringApplication.run(TalentMatchApplication.class, args);
 	}
 
