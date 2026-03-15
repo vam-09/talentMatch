@@ -18,7 +18,7 @@ import java.time.ZonedDateTime;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long userId;
+    private Long userId;
 
     private String userName;
 
@@ -30,6 +30,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+//   Tells JPA to store the enum’s name (e.g., "ACTIVE") as a String in the database instead of its numeric index.
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;

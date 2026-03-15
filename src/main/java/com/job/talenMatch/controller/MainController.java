@@ -1,25 +1,25 @@
 package com.job.talenMatch.controller;
 
 import com.job.talenMatch.model.User;
-import com.job.talenMatch.model.UserRole;
 import com.job.talenMatch.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
 public class MainController {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
-    @GetMapping("/home")
-    public String home() {
-        User user = User.builder().userName("vam").email("vam@gmail.com").role(UserRole.APPLICANT).build();
+    @Autowired
+    public MainController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @PostMapping("/register")
+    public String registerUser(@RequestBody User user) {
         userService.registerUser(user);
-        return "Welcome to TalentMatch API";
+        return "User registered successfully";
     }
 
     @GetMapping("/health")
