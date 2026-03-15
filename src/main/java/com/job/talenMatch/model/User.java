@@ -1,25 +1,24 @@
 package com.job.talenMatch.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.ZonedDateTime;
 
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
+@Data
+@Builder
+@Getter
+@Setter
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long userId;
+    private Long userId;
 
     private String userName;
 
@@ -31,13 +30,12 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+//   Tells JPA to store the enum’s name (e.g., "ACTIVE") as a String in the database instead of its numeric index.
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
 
-    @CreationTimestamp
     private ZonedDateTime createdAt;
 
-    @UpdateTimestamp
     private ZonedDateTime updatedAt;
 }
