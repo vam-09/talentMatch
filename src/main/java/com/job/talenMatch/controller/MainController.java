@@ -1,6 +1,6 @@
 package com.job.talenMatch.controller;
 
-import com.job.talenMatch.model.User;
+import com.job.talenMatch.entity.User;
 import com.job.talenMatch.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

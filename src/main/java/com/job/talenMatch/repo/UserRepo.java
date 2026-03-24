@@ -1,6 +1,6 @@
 package com.job.talenMatch.repo;
 
-import com.job.talenMatch.model.User;
+import com.job.talenMatch.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

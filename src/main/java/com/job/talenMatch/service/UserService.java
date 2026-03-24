@@ -1,6 +1,6 @@
 package com.job.talenMatch.service;
 
-import com.job.talenMatch.model.User;
+import com.job.talenMatch.entity.User;
 import com.job.talenMatch.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;

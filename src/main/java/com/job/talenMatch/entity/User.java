@@ -1,4 +1,4 @@
-package com.job.talenMatch.model;
+package com.job.talenMatch.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

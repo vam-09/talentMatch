@@ -1,4 +1,4 @@
-package com.job.talenMatch.model;
+package com.job.talenMatch.entity;
 
 public enum UserRole {
     RECRUITER,
