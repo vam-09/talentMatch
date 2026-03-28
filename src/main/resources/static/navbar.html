@@ -1,0 +1,178 @@
+<nav class="navbar">
+    <div class="navbar-container">
+        <a href="/index.html" class="navbar-logo">TalentMatch</a>
+        <ul class="navbar-menu">
+            <li><a href="/job-list.html" class="nav-link">Jobs</a></li>
+            <li><a href="/registration.html" class="nav-link">Register</a></li>
+            <li class="user-info-container" id="auth-section">
+                <!-- User icon will appear here if logged in, otherwise Login link -->
+                <a href="/login" class="nav-link">Login</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+    .navbar {
+        background-color: #ffffff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 10px 0;
+        margin-bottom: 20px;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .navbar-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+    }
+
+    .navbar-logo {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #007BFF;
+        text-decoration: none;
+    }
+
+    .navbar-menu {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .nav-link {
+        text-decoration: none;
+        color: #555;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    .nav-link:hover {
+        color: #007BFF;
+    }
+
+    /* User Info & Dropdown */
+    .user-info-container {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .user-icon-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #555;
+        font-size: 1.2rem;
+        transition: color 0.3s;
+    }
+
+    .user-icon-wrapper:hover {
+        color: #007BFF;
+    }
+
+    .user-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: #fff;
+        min-width: 160px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        border-radius: 8px;
+        padding: 10px 0;
+        margin-top: 10px;
+        z-index: 1001;
+        border: 1px solid #eee;
+    }
+
+    .user-info-container:hover .user-dropdown,
+    .user-info-container.active .user-dropdown {
+        display: block;
+    }
+
+    .dropdown-header {
+        padding: 8px 20px;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .dropdown-item {
+        display: block;
+        padding: 10px 20px;
+        color: #555;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: background-color 0.2s;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+        color: #007BFF;
+    }
+
+    .logout-item {
+        color: #dc3545;
+    }
+
+    .logout-item:hover {
+        background-color: #fff5f5;
+        color: #c82333;
+    }
+</style>
+
+<script>
+    async function checkAuth() {
+        const authSection = document.getElementById('auth-section');
+        try {
+            const response = await fetch('/api/user/me');
+            if (response.ok) {
+                const data = await response.json();
+                authSection.innerHTML = `
+                    <div class="user-icon-wrapper" id="user-trigger">
+                        <i class="fas fa-user-circle"></i>
+                        <i class="fas fa-caret-down" style="font-size: 0.8rem;"></i>
+                    </div>
+                    <div class="user-dropdown">
+                        <div class="dropdown-header">Hi, ${data.username}</div>
+                        <a href="/logout" class="dropdown-item logout-item">
+                            <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout
+                        </a>
+                    </div>
+                `;
+
+                // Toggle active class on click for mobile/touch
+                const trigger = document.getElementById('user-trigger');
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    authSection.classList.toggle('active');
+                });
+
+                document.addEventListener('click', () => {
+                    authSection.classList.remove('active');
+                });
+            }
+        } catch (error) {
+            console.error('Auth check failed:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', checkAuth);
+</script>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

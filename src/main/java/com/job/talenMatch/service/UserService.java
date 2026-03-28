@@ -20,10 +20,14 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void registerUser(User user){
+    public User registerUser(User user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setCreatedAt(ZonedDateTime.now());
         user.setUpdatedAt(ZonedDateTime.now());
-        userRepo.save(user);
+        return userRepo.save(user);
+    }
+
+    public User findUser(String userName){
+        return userRepo.findByUserName(userName);
     }
 }
