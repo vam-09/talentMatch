@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class TalentMatchApplication {
 
 	public static void main(String[] args) {
-//		log.info("inside the function");
+		log.info("inside the function");
 
 
 		SpringApplication.run(TalentMatchApplication.class, args);

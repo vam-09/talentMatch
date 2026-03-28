@@ -40,4 +40,7 @@ public class User {
 
     @UpdateTimestamp
     private ZonedDateTime updatedAt;
+
+    @OneToOne(mappedBy = "user")
+    private Resume resume;
 }
