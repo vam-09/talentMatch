@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Listings - TalentMatch</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+        :root {
+            --primary-color: #007BFF;
+            --primary-hover: #0056b3;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+            --border-color: #e9ecef;
+            --card-bg: #ffffff;
+            --text-color: #495057;
+            --success-color: #28a745;
+            --font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--light-gray);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            color: var(--dark-gray);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .job-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .job-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .company-name {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .job-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin: 5px 0 15px 0;
+        }
+
+        .job-details {
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .detail-icon {
+            margin-right: 10px;
+            color: var(--primary-color);
+            width: 18px;
+            text-align: center;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tag {
+            background-color: #e9ecef;
+            color: var(--dark-gray);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .apply-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .apply-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Loading and Error States */
+        #loading, #error-message {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 50px;
+        }
+
+        #loading {
+            color: var(--primary-color);
+        }
+
+        #error-message {
+            color: #dc3545;
+            display: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div id="navbar-placeholder"></div>
+
+    <div class="container">
+        <header>
+            <h1>Explore Opportunities</h1>
+            <p>Find your next career move from hundreds of top companies.</p>
+        </header>
+
+        <div id="loading">
+            <i class="fas fa-spinner fa-spin"></i> Loading jobs...
+        </div>
+
+        <div id="error-message">
+            <i class="fas fa-exclamation-circle"></i> Failed to load jobs. Please try again later.
+        </div>
+
+        <div id="job-grid" class="job-grid">
+            <!-- Job cards will be inserted here dynamically -->
+        </div>
+    </div>
+
+    <script>
+        // Load Navbar
+        fetch('/navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navbar-placeholder').innerHTML = html;
+                // Important: Execute scripts in the injected HTML
+                const scripts = document.getElementById('navbar-placeholder').getElementsByTagName('script');
+                for (let script of scripts) {
+                    eval(script.innerText);
+                }
+            })
+            .catch(error => console.error('Error loading navbar:', error));
+
+        async function fetchJobs() {
+            const jobGrid = document.getElementById('job-grid');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+
+            try {
+                // Fetch jobs from the backend API
+                const response = await fetch('/api/jobs');
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch jobs');
+                }
+
+                const jobs = await response.json();
+
+                // Clear loading state
+                loading.style.display = 'none';
+
+                if (jobs.length === 0) {
+                    jobGrid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">No jobs found at the moment.</p>';
+                    return;
+                }
+
+                // Render each job
+                jobs.forEach(job => {
+                    const jobCard = document.createElement('div');
+                    jobCard.className = 'job-card';
+
+                    // Determine badge color for Job Status
+                    let statusColor = '#6c757d';
+                    if (job.jobStatus === 'OPEN') statusColor = '#28a745';
+                    else if (job.jobStatus === 'CLOSED') statusColor = '#dc3545';
+
+                    // Create HTML for required skills (if any)
+                    let skillsHtml = '';
+                    if (job.requiredSkills) {
+                        const skills = job.requiredSkills.split(',').slice(0, 3); // Show top 3
+                        skills.forEach(skill => {
+                            skillsHtml += `<span class="tag">${skill.trim()}</span>`;
+                        });
+                    }
+
+                    jobCard.innerHTML = `
+                        <div>
+                            <div class="job-header">
+                                <span class="company-name">${job.companyName || 'Confidential'}</span>
+                                <span class="tag" style="background-color: ${statusColor}20; color: ${statusColor};">
+                                    ${job.jobStatus || 'OPEN'}
+                                </span>
+                            </div>
+                            <h2 class="job-title">${job.jobTitle}</h2>
+
+                            <div class="job-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-map-marker-alt detail-icon"></i>
+                                    ${job.location || 'Remote'}
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-briefcase detail-icon"></i>
+                                    ${job.workModel || 'Full-time'}
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-money-bill-wave detail-icon"></i>
+                                    ${job.ctc ? '₹' + job.ctc : 'Not Disclosed'}
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-graduation-cap detail-icon"></i>
+                                    ${job.educationRequirement || 'Not Specified'}
+                                </div>
+                            </div>
+
+                            <div class="tags">
+                                ${skillsHtml}
+                            </div>
+                        </div>
+
+                        <button onclick="applyForJob(${job.jobId})" class="apply-btn">Apply Now</button>
+                    `;
+
+                    jobGrid.appendChild(jobCard);
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+                loading.style.display = 'none';
+                errorMessage.style.display = 'block';
+            }
+        }
+
+        async function applyForJob(jobId) {
+            if (!confirm('Are you sure you want to apply for this job?')) return;
+
+            try {
+                const response = await fetch('/api/apply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ jobId: jobId })
+                });
+
+                if (response.ok) {
+                    alert('Application submitted successfully!');
+                } else if (response.status === 401) {
+                    alert('You must be logged in to apply.');
+                    window.location.href = '/login'; // Redirect to login
+                } else {
+                    const errorText = await response.text();
+                    alert('Application failed: ' + errorText);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while applying.');
+            }
+        }
+
+        // Load jobs when page loads
+        document.addEventListener('DOMContentLoaded', fetchJobs);
+    </script>
+
+</body>
+</html>
