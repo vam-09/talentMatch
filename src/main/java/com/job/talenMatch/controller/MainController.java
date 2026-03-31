@@ -39,6 +39,11 @@ public class MainController {
         }
     }
 
+    @GetMapping("/register")
+    public String register(){
+        return "forward:/registration.html";
+    }
+
     @GetMapping("/user/me")
     @ResponseBody
     public ResponseEntity<Map<String, String>> getCurrentUser(Authentication authentication) {

@@ -29,7 +29,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: calc(100vh - 80px); /* Adjust for navbar height */
+            min-height: calc(100vh - 80px);
             padding: 20px;
         }
 
@@ -217,11 +217,15 @@
         fetch('/navbar.html')
             .then(response => response.text())
             .then(html => {
-                document.getElementById('navbar-placeholder').innerHTML = html;
-                const scripts = document.getElementById('navbar-placeholder').getElementsByTagName('script');
-                for (let script of scripts) {
-                    eval(script.innerText);
-                }
+                const placeholder = document.getElementById('navbar-placeholder');
+                placeholder.innerHTML = html;
+                const scripts = placeholder.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
             })
             .catch(error => console.error('Error loading navbar:', error));
 
@@ -242,7 +246,7 @@
             const skillsListContainer = document.getElementById('skills-list');
 
             try {
-                // Fetch the list of skills from the new backend API
+                // Fetch the list of skills from the backend API
                 const response = await fetch('/api/skills');
 
                 if (!response.ok) {

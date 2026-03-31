@@ -5,7 +5,6 @@
             <li><a href="/job-list.html" class="nav-link">Jobs</a></li>
             <li><a href="/registration.html" class="nav-link">Register</a></li>
             <li class="user-info-container" id="auth-section">
-                <!-- User icon will appear here if logged in, otherwise Login link -->
                 <a href="/login" class="nav-link">Login</a>
             </li>
         </ul>
@@ -62,10 +61,11 @@
         color: #007BFF;
     }
 
-    /* User Info & Dropdown */
     .user-info-container {
         position: relative;
         cursor: pointer;
+        padding-bottom: 10px; /* Bridge gap between trigger and dropdown */
+        margin-bottom: -10px; /* Compensate for padding */
     }
 
     .user-icon-wrapper {
@@ -73,12 +73,16 @@
         align-items: center;
         gap: 8px;
         color: #555;
-        font-size: 1.2rem;
-        transition: color 0.3s;
+        padding: 5px 12px;
+        border-radius: 20px;
+        background-color: #f8f9fa;
+        border: 1px solid #eee;
+        transition: all 0.3s;
     }
 
     .user-icon-wrapper:hover {
-        color: #007BFF;
+        border-color: #007BFF;
+        background-color: #f0f7ff;
     }
 
     .user-dropdown {
@@ -87,13 +91,24 @@
         top: 100%;
         right: 0;
         background-color: #fff;
-        min-width: 160px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        min-width: 180px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
         border-radius: 8px;
         padding: 10px 0;
-        margin-top: 10px;
+        margin-top: 5px;
         z-index: 1001;
         border: 1px solid #eee;
+    }
+
+    /* Invisible bridge to keep hover active */
+    .user-dropdown::before {
+        content: "";
+        position: absolute;
+        top: -15px;
+        right: 0;
+        width: 100%;
+        height: 15px;
+        background: transparent;
     }
 
     .user-info-container:hover .user-dropdown,
@@ -102,21 +117,31 @@
     }
 
     .dropdown-header {
-        padding: 8px 20px;
+        padding: 10px 20px;
         font-weight: 600;
-        color: #333;
+        color: #888;
         border-bottom: 1px solid #eee;
         margin-bottom: 5px;
-        font-size: 0.9rem;
-        white-space: nowrap;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+    }
+
+    .dropdown-username {
+        display: block;
+        padding: 0 20px 10px 20px;
+        font-weight: 600;
+        color: #333;
+        font-size: 1rem;
     }
 
     .dropdown-item {
-        display: block;
-        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px;
         color: #555;
         text-decoration: none;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         transition: background-color 0.2s;
     }
 
@@ -126,6 +151,8 @@
     }
 
     .logout-item {
+        border-top: 1px solid #eee;
+        margin-top: 5px;
         color: #dc3545;
     }
 
@@ -136,7 +163,7 @@
 </style>
 
 <script>
-    async function checkAuth() {
+    (async function initNavbar() {
         const authSection = document.getElementById('auth-section');
         try {
             const response = await fetch('/api/user/me');
@@ -144,18 +171,18 @@
                 const data = await response.json();
                 authSection.innerHTML = `
                     <div class="user-icon-wrapper" id="user-trigger">
-                        <i class="fas fa-user-circle"></i>
-                        <i class="fas fa-caret-down" style="font-size: 0.8rem;"></i>
+                        <i class="fas fa-user-circle" style="font-size: 1.4rem; color: #007BFF;"></i>
+                        <i class="fas fa-caret-down" style="font-size: 0.8rem; color: #aaa;"></i>
                     </div>
                     <div class="user-dropdown">
-                        <div class="dropdown-header">Hi, ${data.username}</div>
+                        <div class="dropdown-header">Logged in as</div>
+                        <div class="dropdown-username">${data.username}</div>
                         <a href="/logout" class="dropdown-item logout-item">
-                            <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout
+                            <i class="fas fa-sign-out-alt"></i> Logout
                         </a>
                     </div>
                 `;
 
-                // Toggle active class on click for mobile/touch
                 const trigger = document.getElementById('user-trigger');
                 trigger.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -169,10 +196,5 @@
         } catch (error) {
             console.error('Auth check failed:', error);
         }
-    }
-
-    document.addEventListener('DOMContentLoaded', checkAuth);
+    })();
 </script>
-
-<!-- FontAwesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

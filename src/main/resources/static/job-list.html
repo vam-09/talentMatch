@@ -202,12 +202,17 @@
         fetch('/navbar.html')
             .then(response => response.text())
             .then(html => {
-                document.getElementById('navbar-placeholder').innerHTML = html;
-                // Important: Execute scripts in the injected HTML
-                const scripts = document.getElementById('navbar-placeholder').getElementsByTagName('script');
-                for (let script of scripts) {
-                    eval(script.innerText);
-                }
+                const placeholder = document.getElementById('navbar-placeholder');
+                placeholder.innerHTML = html;
+
+                // Execute scripts in the injected HTML properly
+                const scripts = placeholder.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
             })
             .catch(error => console.error('Error loading navbar:', error));
 

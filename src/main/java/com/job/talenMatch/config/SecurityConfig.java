@@ -20,31 +20,39 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private UserRepo userRepo;
+    private final UserRepo userRepo;
 
     @Autowired
     SecurityConfig(UserRepo userRepo){
         this.userRepo = userRepo;
-
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // createDelegatingPasswordEncoder is a wrapper class of bcryptPasswordEncoder. why use it - it Supports multiple algorithms ({noop}, {sha256}).
-        // Noop(NoOpPasswordEncoder) is used in app.prop for security password so whenever we use noop, it says to security that this is plain text and don't compare it with hash conversion, compare it with string only
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())  // Disable CSRF protection - check doc
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/register").permitAll()
+                .requestMatchers("/api/register", "/registration.html", "/login.html", "/login").permitAll()
                 .anyRequest().authenticated()
             )
-            .httpBasic(withDefaults()) // Enable Basic Auth - this tells spring security to expect and process user creds sent in authorization  http req(other req than mentioned abv) header for every request to protected resources
-            .formLogin(withDefaults()); // Enable Form Login - this provides the default login page for browser access
+            .httpBasic(withDefaults())
+            .formLogin(form -> form
+                .loginPage("/login.html") // Use custom login page
+                .loginProcessingUrl("/login") // URL to submit the login form
+                .defaultSuccessUrl("/api/allJobs", true)
+                .failureUrl("/login.html?error=true") // Redirect here on failure
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login.html?logout=true")
+                .permitAll()
+            );
 
         return http.build();
     }
