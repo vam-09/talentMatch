@@ -1,8 +1,9 @@
 <nav class="navbar">
     <div class="navbar-container">
         <a href="/index.html" class="navbar-logo">TalentMatch</a>
-        <ul class="navbar-menu">
+        <ul class="navbar-menu" id="main-nav-menu">
             <li><a href="/job-list.html" class="nav-link">Jobs</a></li>
+            <!-- Dynamic link will be injected here -->
             <li><a href="/registration.html" class="nav-link">Register</a></li>
             <li class="user-info-container" id="auth-section">
                 <a href="/login" class="nav-link">Login</a>
@@ -164,11 +165,26 @@
 
 <script>
     (async function initNavbar() {
+        const mainNavMenu = document.getElementById('main-nav-menu');
         const authSection = document.getElementById('auth-section');
+
         try {
             const response = await fetch('/api/user/me');
             if (response.ok) {
                 const data = await response.json();
+
+                // Insert dynamic link based on role
+                const dynamicLink = document.createElement('li');
+                if (data.role === 'APPLICANT') {
+                    dynamicLink.innerHTML = '<a href="/my-applications.html" class="nav-link">My Applications</a>';
+                    mainNavMenu.insertBefore(dynamicLink, authSection); // Insert before auth section
+                } else if (data.role === 'RECRUITER') {
+                    dynamicLink.innerHTML = '<a href="/my-jobs.html" class="nav-link">My Jobs</a>'; // Assuming a recruiter jobs page
+                    dynamicLink.innerHTML += '<a href="/create-job.html" class="nav-link">Create Job</a>';
+                }
+                mainNavMenu.insertBefore(dynamicLink, authSection); // Insert before auth section
+
+                // Update auth section for logged-in user
                 authSection.innerHTML = `
                     <div class="user-icon-wrapper" id="user-trigger">
                         <i class="fas fa-user-circle" style="font-size: 1.4rem; color: #007BFF;"></i>
@@ -195,6 +211,7 @@
             }
         } catch (error) {
             console.error('Auth check failed:', error);
+            // If not logged in, authSection remains with "Login" link
         }
     })();
 </script>

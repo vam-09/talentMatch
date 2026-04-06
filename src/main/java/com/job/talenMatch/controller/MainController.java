@@ -14,6 +14,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+//user shd be able to filter the jobs based on diff criterias - ✅
+//live streaming. - instant search - ✅
+//if user is recruiter, they shd be able to see the jobs they have added - ✅
+//shd be able to search job based on name and skills - ✅
+//Applicant shd be able to see which jobs they have applied to in job-list ✅
+// add the job, update the job, delete the job
+// update user details
+// Recruiter shd see the applicant for each job
+
+
 @Controller
 @RequestMapping("/api")
 public class MainController {
@@ -52,6 +62,11 @@ public class MainController {
         }
         Map<String, String> userInfo = new HashMap<>();
         userInfo.put("username", authentication.getName());
+        // Add user role to the response
+        authentication.getAuthorities().stream()
+                .filter(a -> a.getAuthority().startsWith("ROLE_"))
+                .findFirst()
+                .ifPresent(a -> userInfo.put("role", a.getAuthority().substring(5))); // Remove "ROLE_" prefix
         return ResponseEntity.ok(userInfo);
     }
 
@@ -60,4 +75,5 @@ public class MainController {
     public String healthCheck() {
         return "Application is running";
     }
+
 }

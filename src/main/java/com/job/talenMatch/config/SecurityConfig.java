@@ -42,8 +42,9 @@ public class SecurityConfig {
             )
             .httpBasic(withDefaults())
             .formLogin(form -> form
-                .loginPage("/login.html") // Use custom login page
-                .loginProcessingUrl("/login") // URL to submit the login form
+                .loginPage("/login.html") // Use custom login page, this is where user will directed
+                .loginProcessingUrl("/login") // URL to submit the login form, once user clicks on login button. post req will be sent to /login url.You don't actually write a controller for this /login URL.
+                    // Spring Security's filters "catch" it automatically.
                 .defaultSuccessUrl("/api/allJobs", true)
                 .failureUrl("/login.html?error=true") // Redirect here on failure
                 .permitAll()

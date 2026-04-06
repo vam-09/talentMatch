@@ -1,11 +1,14 @@
 package com.job.talenMatch.service;
 
+import com.job.talenMatch.dto.JobApplicationResponseDto;
 import com.job.talenMatch.model.*;
 import com.job.talenMatch.repo.ApplicationRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.job.talenMatch.model.UserRole.APPLICANT;
 
@@ -37,4 +40,30 @@ public class ApplicationService {
         applicationRepo.save(application);
 
     }
+
+    public List<Application> getJobApplications(String userName) {
+
+        User user = userService.findUser(userName);
+        List<Application> userApplications = applicationRepo.findApplicationByApplicant(user);
+
+        return userApplications;
+    }
+
+//    public List<JobApplicationResponseDto> getJobApplications(String userName) {
+//
+//        List<JobApplicationResponseDto> jobApplicationResponseDtos = new ArrayList<>();
+//
+//        User user = userService.findUser(userName);
+//        List<Application> userApplications = applicationRepo.findApplicationByApplicant(user);
+//
+//        for(Application application : userApplications){
+//            JobApplicationResponseDto jobApplicationResponseDto = new JobApplicationResponseDto();
+//            jobApplicationResponseDto.setJob(application.getJob());
+//            jobApplicationResponseDto.setApplicationStatus(application.getStatus());
+//            jobApplicationResponseDto.setApplicationDate(application.getApplicationDate());
+//            jobApplicationResponseDtos.add(jobApplicationResponseDto);
+//        }
+//
+//        return jobApplicationResponseDtos;
+//    }
 }

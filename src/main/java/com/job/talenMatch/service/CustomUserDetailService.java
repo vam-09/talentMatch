@@ -19,7 +19,8 @@ public class CustomUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userService.findUser(username);
-        UserDetails userDetailsUser = org.springframework.security.core.userdetails.User.builder().username(username).password(user.getPassword()).build();
+        // The .roles() method is a convenience helper. It takes your raw role name (e.g., APPLICANT), adds ROLE_ to the front, and stores it as a GrantedAuthority that Spring Security can use for permission checks.
+        UserDetails userDetailsUser = org.springframework.security.core.userdetails.User.builder().username(username).roles(user.getRole().name()).password(user.getPassword()).build();
 
          return userDetailsUser;
     }
