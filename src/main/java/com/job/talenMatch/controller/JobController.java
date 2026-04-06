@@ -59,14 +59,14 @@ public class JobController {
     @PostMapping("/job/update")
     @ResponseBody
     public Job updateJob(@RequestBody Job job){
+
         return jobService.updateJob(job);
     }
 
-    @PostMapping("/job/delete")
+    @DeleteMapping("/job/delete")
+    @ResponseBody
     public void deleteJob(@RequestParam("id") Long jobId){
         jobService.deleteJob(jobId);
     }
-
-
 
 }

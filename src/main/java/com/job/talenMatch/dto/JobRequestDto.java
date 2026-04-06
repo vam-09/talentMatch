@@ -5,11 +5,13 @@ import com.job.talenMatch.model.Shift;
 import com.job.talenMatch.model.User;
 import com.job.talenMatch.model.WorkModel;
 import jakarta.persistence.*;
+import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.ZonedDateTime;
 
+@Data
 public class JobRequestDto {
 
     private String companyName;

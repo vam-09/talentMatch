@@ -80,16 +80,47 @@ public class JobService {
         return jobApplicationResponseDtos;
     }
 
-    public Job updateJob(Job job) {
-        deleteJob(job.getJobId());
-        return jobRepo.save(job);
+    public Job updateJob(Job updatedJob) {
+        // 1. Fetch the existing job from the DB
+        Job existingJob = jobRepo.findById(updatedJob.getJobId())
+                .orElseThrow(() -> new RuntimeException("Job not found with id: " + updatedJob.getJobId()));
+
+        // 2. Update only the fields that are allowed to change from the UI
+        existingJob.setJobTitle(updatedJob.getJobTitle());
+        existingJob.setCompanyName(updatedJob.getCompanyName());
+        existingJob.setJobStatus(updatedJob.getJobStatus());
+        existingJob.setJobDescription(updatedJob.getJobDescription());
+        existingJob.setRequiredSkills(updatedJob.getRequiredSkills());
+        existingJob.setLocation(updatedJob.getLocation());
+        existingJob.setCtc(updatedJob.getCtc());
+        existingJob.setWorkModel(updatedJob.getWorkModel());
+        existingJob.setShift(updatedJob.getShift());
+        existingJob.setWorkDays(updatedJob.getWorkDays());
+        existingJob.setEducationRequirement(updatedJob.getEducationRequirement());
+        existingJob.setExperience(updatedJob.getExperience());
+        existingJob.setApplicationDeadline(updatedJob.getApplicationDeadline());
+
+        // 3. Save the existingJob (JPA will perform an UPDATE)
+        return jobRepo.save(existingJob);
     }
 
     public Job addJob(JobRequestDto jobRequestDto, String userName) {
         Job job = new Job();
         User recruiter = userService.findUser(userName);
 
-//        job.
+        job.setJobDescription(jobRequestDto.getJobDescription());
+        job.setJobTitle(jobRequestDto.getJobTitle());
+        job.setApplicationDeadline(jobRequestDto.getApplicationDeadline());
+        job.setCompanyName(jobRequestDto.getCompanyName());
+        job.setRequiredSkills(jobRequestDto.getRequiredSkills());
+        job.setEducationRequirement(jobRequestDto.getEducationRequirement());
+        job.setCtc(jobRequestDto.getCtc());
+        job.setLocation(jobRequestDto.getLocation());
+        job.setExperience(jobRequestDto.getExperience());
+        job.setShift(jobRequestDto.getShift());
+        job.setWorkDays(jobRequestDto.getWorkDays());
+        job.setWorkModel(jobRequestDto.getWorkModel());
+
         job.setRecruiter(recruiter);
         job.setCreatedAt(ZonedDateTime.now());
         job.setJobStatus(JobStatus.OPEN);

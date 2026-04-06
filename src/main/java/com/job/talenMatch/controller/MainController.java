@@ -19,7 +19,7 @@ import java.util.Map;
 //if user is recruiter, they shd be able to see the jobs they have added - ✅
 //shd be able to search job based on name and skills - ✅
 //Applicant shd be able to see which jobs they have applied to in job-list ✅
-// add the job, update the job, delete the job
+// add the job, update the job, delete the job ✅
 // update user details
 // Recruiter shd see the applicant for each job
 

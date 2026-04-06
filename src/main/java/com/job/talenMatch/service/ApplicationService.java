@@ -42,28 +42,15 @@ public class ApplicationService {
     }
 
     public List<Application> getJobApplications(String userName) {
-
         User user = userService.findUser(userName);
         List<Application> userApplications = applicationRepo.findApplicationByApplicant(user);
 
         return userApplications;
     }
 
-//    public List<JobApplicationResponseDto> getJobApplications(String userName) {
-//
-//        List<JobApplicationResponseDto> jobApplicationResponseDtos = new ArrayList<>();
-//
-//        User user = userService.findUser(userName);
-//        List<Application> userApplications = applicationRepo.findApplicationByApplicant(user);
-//
-//        for(Application application : userApplications){
-//            JobApplicationResponseDto jobApplicationResponseDto = new JobApplicationResponseDto();
-//            jobApplicationResponseDto.setJob(application.getJob());
-//            jobApplicationResponseDto.setApplicationStatus(application.getStatus());
-//            jobApplicationResponseDto.setApplicationDate(application.getApplicationDate());
-//            jobApplicationResponseDtos.add(jobApplicationResponseDto);
-//        }
-//
-//        return jobApplicationResponseDtos;
-//    }
+    public List<Application> getJobSpecificApplications(Long jobId) {
+        Job job = jobService.findJob(jobId);
+        return applicationRepo.findApplicationByJob(job);
+    }
+
 }

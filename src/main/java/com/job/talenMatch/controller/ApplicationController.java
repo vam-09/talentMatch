@@ -45,6 +45,11 @@ public class ApplicationController {
         catch(Exception e){
             throw new RuntimeException(e);
         }
+    }
 
+    @GetMapping("/jobSpecificApplications")
+    @ResponseBody
+    public List<Application> jobSpecificApplications(@RequestParam Long jobId){
+        return applicationService.getJobSpecificApplications(jobId);
     }
 }
