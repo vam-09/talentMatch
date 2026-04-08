@@ -50,6 +50,7 @@ public class ApplicationController {
     @GetMapping("/jobSpecificApplications")
     @ResponseBody
     public List<Application> jobSpecificApplications(@RequestParam Long jobId){
-        return applicationService.getJobSpecificApplications(jobId);
+        List<Application> applications = applicationService.getJobSpecificApplications(jobId);
+        return applications;
     }
 }

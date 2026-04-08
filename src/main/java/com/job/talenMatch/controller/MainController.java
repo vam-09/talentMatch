@@ -21,7 +21,11 @@ import java.util.Map;
 //Applicant shd be able to see which jobs they have applied to in job-list ✅
 // add the job, update the job, delete the job ✅
 // update user details
-// Recruiter shd see the applicant for each job
+// Recruiter shd see the applicant for each job ✅
+// alignment on create-job page
+// user shd have firstname and lastname
+// user skills shd be fetched from skills table and for jobs as well sort it
+
 
 
 @Controller

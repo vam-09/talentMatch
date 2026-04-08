@@ -199,6 +199,12 @@
             padding-bottom: 10px;
         }
 
+        .modal-header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         .close-modal {
             cursor: pointer;
             font-size: 1.5rem;
@@ -246,6 +252,7 @@
         .btn-edit { background: var(--primary-color); color: white; }
         .btn-delete { background: #dc3545; color: white; }
         .btn-save { background: #28a745; color: white; }
+        .btn-applicants { background: rgba(19, 197, 52, 0.86); color: white; }
         .btn-cancel { background: #6c757d; color: white; }
         .btn:hover { opacity: 0.9; }
 
@@ -358,7 +365,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modal-title-text">Job Details</h2>
-                <span class="close-modal" id="close-modal">&times;</span>
+                <div class="modal-header-right">
+                    <button class="btn btn-applicants" id="btn-view-applicants" style="padding: 6px 12px; font-size: 0.85rem;">View Applicants</button>
+                    <span class="close-modal" id="close-modal">&times;</span>
+                </div>
             </div>
             
             <!-- View Mode -->
@@ -619,12 +629,14 @@
             viewMode.style.display = 'block';
             editMode.style.display = 'none';
             document.getElementById('modal-title-text').innerText = "Job Details";
+            document.getElementById('btn-view-applicants').style.display = 'block';
         }
 
         function switchToEdit() {
             viewMode.style.display = 'none';
             editMode.style.display = 'block';
             document.getElementById('modal-title-text').innerText = "Edit Job";
+            document.getElementById('btn-view-applicants').style.display = 'none';
             
             document.getElementById('edit-id').value = currentJob.jobId;
             document.getElementById('edit-title').value = currentJob.jobTitle;
@@ -683,6 +695,9 @@
         document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
         document.getElementById('btn-switch-edit').onclick = switchToEdit;
         document.getElementById('btn-cancel-edit').onclick = switchToView;
+        document.getElementById('btn-view-applicants').onclick = () => {
+            window.location.href = `/job-applicants.html?jobId=${currentJob.jobId}`;
+        };
 
         // Update Job
         editMode.onsubmit = async (e) => {
