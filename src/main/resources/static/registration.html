@@ -164,7 +164,15 @@
             <form id="registration-form">
                 <!-- Basic User Fields -->
                 <div class="form-group">
-                    <label for="userName">Full Name</label>
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="userName">User Name</label>
                     <input type="text" id="userName" name="userName" required>
                 </div>
                 <div class="form-group">
@@ -298,6 +306,8 @@
             const data = {
                 user: {
                     userName: formData.get('userName'),
+                    firstName: formData.get('firstName'),
+                    lastName: formData.get('lastName'),
                     email: formData.get('email'),
                     phoneNumber: formData.get('phoneNumber'),
                     password: formData.get('password'),

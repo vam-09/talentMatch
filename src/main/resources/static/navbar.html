@@ -138,6 +138,12 @@
         font-weight: 600;
         color: #333;
         font-size: 1rem;
+        text-decoration: none;
+    }
+
+    .dropdown-username:hover {
+        background-color: #f8f9fa;
+        color: #007BFF;
     }
 
     .dropdown-item {
@@ -197,7 +203,7 @@
                     </div>
                     <div class="user-dropdown">
                         <div class="dropdown-header">Logged in as</div>
-                        <div class="dropdown-username">${data.username}</div>
+                        <a href="/user-details.html?userName=${data.username}" class="dropdown-username">${data.username}</a>
                         <a href="/logout" class="dropdown-item logout-item">
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </a>

@@ -161,6 +161,15 @@
             border-radius: 12px;
             display: none;
         }
+        .job-title-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .job-title-link:hover{
+            text-decoration: underline;
+        }
+
 
         #loading { display: block; }
     </style>
@@ -292,7 +301,9 @@
 
                 row.innerHTML = `
                     <td>
-                        <span class="job-title">${job.jobTitle || 'Unknown Position'}</span>
+                        <a href="/job-details.html?jobId=${job.jobId || ''}" class="job-title job-title-link">
+                            ${job.jobTitle || 'Unknown Position'}
+                        </a>
                         <span class="company-name">${job.companyName || 'Unknown Company'}</span>
                     </td>
                     <td>${formattedDate}</td>

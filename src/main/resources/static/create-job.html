@@ -287,27 +287,20 @@
         let selectedSkills = [];
 
         async function initPage() {
-            // Load Navbar dynamically
+            // Load Navbar dynamically to match job-list.html
             const navResponse = await fetch('/navbar.html');
             const navHtml = await navResponse.text();
             const placeholder = document.getElementById('navbar-placeholder');
             placeholder.innerHTML = navHtml;
-            
-            // Manually re-execute scripts in the loaded navbar to handle role-based links
-            const scripts = placeholder.querySelectorAll('script');
-            scripts.forEach(oldScript => {
+
+            // Re-execute scripts in the loaded navbar
+            placeholder.querySelectorAll('script').forEach(oldScript => {
                 const newScript = document.createElement('script');
                 Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
                 newScript.appendChild(document.createTextNode(oldScript.innerHTML));
                 oldScript.parentNode.replaceChild(newScript, oldScript);
             });
 
-            // Highlight "Create Job" as the active link after content is injected
-            setTimeout(() => {
-                const createJobLink = document.querySelector('a[href="/create-job.html"]');
-                if (createJobLink) createJobLink.classList.add('active');
-            }, 100);
-            
             await loadSkills();
         }
 

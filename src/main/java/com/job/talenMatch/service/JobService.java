@@ -5,12 +5,16 @@ import com.job.talenMatch.dto.JobRequestDto;
 import com.job.talenMatch.model.*;
 import com.job.talenMatch.repo.ApplicationRepo;
 import com.job.talenMatch.repo.JobRepo;
+import com.job.talenMatch.repo.JobSkillRepo;
+import com.job.talenMatch.repo.SkillRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class JobService {
@@ -18,12 +22,19 @@ public class JobService {
     private final JobRepo jobRepo;
     private final UserService userService;
     private final ApplicationRepo applicationRepo;
+    private final JobSkillRepo jobSkillRepo;
+    private final SkillRepo skillRepo;
+    private final EmailService emailService;
+
 
     @Autowired
-    JobService(JobRepo jobRepo, UserService userService, ApplicationRepo applicationRepo){
+    JobService(JobRepo jobRepo, UserService userService, ApplicationRepo applicationRepo, JobSkillRepo jobSkillRepo, SkillRepo skillRepo, EmailService emailService){
         this.jobRepo = jobRepo;
         this.userService = userService;
         this.applicationRepo = applicationRepo;
+        this.jobSkillRepo = jobSkillRepo;
+        this.skillRepo = skillRepo;
+        this.emailService = emailService;
     }
 
     public Job findJob(Long jobId) {
@@ -31,7 +42,18 @@ public class JobService {
     }
 
     public List<Job> findAllJobs() {
-        return jobRepo.findAll();
+        List<Job> jobs = jobRepo.findAll();
+        jobs.sort((j1, j2) -> {
+            if(j1.getJobStatus() == JobStatus.OPEN && j2.getJobStatus() != JobStatus.OPEN) return -1;
+            if(j1.getJobStatus() != JobStatus.OPEN && j2.getJobStatus() == JobStatus.OPEN) return 1;
+            
+            // Secondary sort by date (Newest first)
+            if (j1.getCreatedAt() != null && j2.getCreatedAt() != null) {
+                return j2.getCreatedAt().compareTo(j1.getCreatedAt());
+            }
+            return 0;
+        });
+        return jobs;
     }
 
     public List<Job> searchJobs(String keyword) {
@@ -125,11 +147,35 @@ public class JobService {
         job.setCreatedAt(ZonedDateTime.now());
         job.setJobStatus(JobStatus.OPEN);
 
+        Set<Skill> requiredJobSkills = fetchSkills(job.getRequiredSkills());
+        job.setSkills(requiredJobSkills);
+
+        List<User> matchingUsers = userService.findMatchingUsers(requiredJobSkills);
+        sendEmail(matchingUsers, job);
+
         return jobRepo.save(job);
     }
+
+    public void sendEmail(List<User> userList, Job job){
+        emailService.sendMail(userList, job);
+
+    }
+
+    public Set<Skill> fetchSkills(String skills){
+        String[] skillArray = skills.split(",");
+        Set<Skill> skillSet = new HashSet<>();
+        for(String skill : skillArray){
+            skillRepo.findBySkillName(skill.trim()).ifPresent(skillSet::add);
+        }
+        return skillSet;
+    }
+
 
     public void deleteJob(Long jobId){
         jobRepo.deleteById(jobId);
     }
 
+    public Job getJob(Long jobId) {
+        return jobRepo.findJobByJobId(jobId);
+    }
 }

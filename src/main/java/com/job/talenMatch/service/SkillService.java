@@ -3,11 +3,11 @@ package com.job.talenMatch.service;
 import com.job.talenMatch.model.Skill;
 import com.job.talenMatch.model.User;
 import com.job.talenMatch.model.UserSkill;
+import com.job.talenMatch.repo.JobSkillRepo;
 import com.job.talenMatch.repo.SkillRepo;
 import com.job.talenMatch.repo.UserSkillRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +17,13 @@ public class SkillService {
 
     private final SkillRepo skillRepo;
     private final UserSkillRepo userSkillRepo;
+    private final JobSkillRepo jobSkillRepo;
 
     @Autowired
-    public SkillService(SkillRepo skillRepo, UserSkillRepo userSkillRepo){
+    public SkillService(SkillRepo skillRepo, UserSkillRepo userSkillRepo, JobSkillRepo jobSkillRepo){
         this.userSkillRepo = userSkillRepo;
         this.skillRepo = skillRepo;
+        this.jobSkillRepo = jobSkillRepo;
     }
 
     public List<Skill> getSkills(){
@@ -35,5 +37,13 @@ public class SkillService {
         });
 
         userSkillRepo.saveAll(userSkills);
+    }
+
+    public void addJobSkills(String skills) {
+        String[] skillArray = skills.split(",");
+        List<Skill> skillList = new ArrayList<>();
+        for(String skill : skillArray){
+            skillRepo.findBySkillName(skill).ifPresent(skillList::add);
+        }
     }
 }

@@ -14,17 +14,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-//user shd be able to filter the jobs based on diff criterias - ✅
-//live streaming. - instant search - ✅
-//if user is recruiter, they shd be able to see the jobs they have added - ✅
-//shd be able to search job based on name and skills - ✅
-//Applicant shd be able to see which jobs they have applied to in job-list ✅
-// add the job, update the job, delete the job ✅
-// update user details
-// Recruiter shd see the applicant for each job ✅
-// alignment on create-job page
-// user shd have firstname and lastname
-// user skills shd be fetched from skills table and for jobs as well sort it
+// ✅ user shd be able to filter the jobs based on diff criterias
+// ✅ live streaming. - instant search
+// ✅ if user is recruiter, they shd be able to see the jobs they have added
+// ✅ shd be able to search job based on name and skills
+// ✅ Applicant shd be able to see which jobs they have applied to in job-list
+// ✅ add the job, update the job, delete the job
+// ✅ Recruiter shd see the applicant for each job
+// ✅ alignment on create-job page
+// ✅ user shd have firstname and lastname
+// ✅ user skills shd be fetched from skills table
+// ✅ in my applications, when clicked in job name- job details shd open
+// ✅ update user details
+// and for jobs - job skills shd be added in job skills table and fetched from there
+// if i am applicant i shd be able to see on job post, that i have applied
+// job which are accepting applications shd be shown first
+// when i click on job box, job details shd open
+
 
 
 

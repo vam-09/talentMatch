@@ -536,9 +536,7 @@
 
                 document.getElementById('jobs-table').style.display = 'table';
 
-                // Initial Sort (Descending by Date)
                 await loadSkills();
-                sortData('desc');
                 filterJobs(); // This will call displayJobs
 
             } catch (error) {

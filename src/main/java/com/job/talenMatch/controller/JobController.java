@@ -5,6 +5,7 @@ import com.job.talenMatch.dto.JobRequestDto;
 import com.job.talenMatch.model.Job;
 import com.job.talenMatch.model.User;
 import com.job.talenMatch.service.JobService;
+import com.job.talenMatch.service.SkillService;
 import com.job.talenMatch.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -18,10 +19,12 @@ import java.util.List;
 public class JobController {
 
     private final JobService jobService;
+    private final SkillService skillService;
 
     @Autowired
-    public JobController(JobService jobService){
+    public JobController(JobService jobService, SkillService skillService){
         this.jobService = jobService;
+        this.skillService= skillService;
     }
 
     @GetMapping("/jobs")
@@ -45,7 +48,6 @@ public class JobController {
     @ResponseBody
     public List<Job> userJobs(Authentication authentication){
         String userName = authentication.getName();
-
         return jobService.findUserJobs(userName);
     }
 
@@ -67,6 +69,13 @@ public class JobController {
     @ResponseBody
     public void deleteJob(@RequestParam("id") Long jobId){
         jobService.deleteJob(jobId);
+    }
+
+    @GetMapping("/job")
+    @ResponseBody
+    public Job getJob(@RequestParam("id") Long jobId){
+        return jobService.getJob(jobId);
+
     }
 
 }

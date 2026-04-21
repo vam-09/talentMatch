@@ -169,9 +169,17 @@
     let allApplicants = [];
 
     async function initPage() {
-        // Load Navbar
-        const navRes = await fetch('/navbar.html');
-        document.getElementById('navbar-placeholder').innerHTML = await navRes.text();
+        const navResponse = await fetch('/navbar.html');
+        const navHtml = await navResponse.text();
+        const placeholder = document.getElementById('navbar-placeholder');
+        placeholder.innerHTML = navHtml;
+
+        placeholder.querySelectorAll('script').forEach(oldScript => {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
 
         // Get Job ID from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -239,7 +247,7 @@
                     <tr>
                          <td>
                              <a href="user-details.html?userName=${app.applicant?.userName}" class="applicant-link">
-                                 ${app.applicant?.userName || 'User'}
+                                 ${app.applicant?.firstName || 'User'} ${app.applicant?.lastName || 'User'}
                              </a>
                          </td>                        <td>${app.applicant?.email || 'N/A'}</td>
                         <td>

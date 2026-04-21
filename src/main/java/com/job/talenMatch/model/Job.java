@@ -6,7 +6,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -61,4 +63,10 @@ public class Job {
     private ZonedDateTime updatedAt;
 
     private ZonedDateTime applicationDeadline;
+
+    @ManyToMany
+    @JoinTable(
+            name = "job_skills",
+            joinColumns = @JoinColumn(name = "job_id"), inverseJoinColumns = @JoinColumn(name = "skill_id"))
+    private Set<Skill> skills = new HashSet<>();
 }
