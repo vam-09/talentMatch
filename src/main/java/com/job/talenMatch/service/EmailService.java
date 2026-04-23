@@ -39,6 +39,7 @@ public class EmailService {
     }
 
     public void sendMail(List<User> users, Job job){
+        // update users abt the lastest matching job
         for(User user : users) {
 
             String text = "Hi " + user.getUserName() + ",\n\nWe have found a new job for you that matches your skills:\n\n" +
@@ -56,5 +57,36 @@ public class EmailService {
 
             javaMailSender.send(simpleMailMessage);
         }
+
+        // update recruiter abt matching applicants
+
+        StringBuilder userDetails = new StringBuilder();
+        for(User user : users){
+            userDetails.append(user.getUserName())
+                    .append("\n")
+                    .append(user.getEmail())
+                    .append("\n")
+                    .append(user.getPhoneNumber())
+                    .append("\n");
+            userDetails.append("http://localhost:8080/user-details.html?userName=")
+                    .append(user.getUserName())
+                    .append("\n\n");
+        }
+
+        String recruiterMailId = job.getRecruiter().getEmail();
+        String text = "Hi " + job.getRecruiter().getUserName() + ",\n\nWe have found some good candidate which matches the skillset you need for the job profile \n" +
+                "Job Title: " + job.getJobTitle() + "\n" +
+                "Company: " + job.getCompanyName() + "\n" +
+                "Below are the user details of potential candidates \n\n" +
+                userDetails + "\n\n" +
+                "Best regards,\nTalentMatch Team";
+        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        simpleMailMessage.setText(text);
+        simpleMailMessage.setTo(recruiterMailId);
+        simpleMailMessage.setSubject("Potential Candidates for Job Role : " + job.getJobTitle());
+        simpleMailMessage.setFrom(sender);
+
+        javaMailSender.send(simpleMailMessage);
+
     }
 }
