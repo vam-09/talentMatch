@@ -1,6 +1,7 @@
 package com.job.talenMatch.service;
 
 import com.job.talenMatch.dto.JobApplicationResponseDto;
+import com.job.talenMatch.dto.JobEvent;
 import com.job.talenMatch.dto.JobRequestDto;
 import com.job.talenMatch.model.*;
 import com.job.talenMatch.repo.ApplicationRepo;
@@ -26,9 +27,10 @@ public class JobService {
     private final SkillRepo skillRepo;
     private final EmailService emailService;
     private final SmsService smsService;
+    private final JobEventProducer jobEventProducer;
 
     @Autowired
-    JobService(JobRepo jobRepo, UserService userService, ApplicationRepo applicationRepo, JobSkillRepo jobSkillRepo, SkillRepo skillRepo, EmailService emailService, SmsService smsService){
+    JobService(JobRepo jobRepo, UserService userService, ApplicationRepo applicationRepo, JobSkillRepo jobSkillRepo, SkillRepo skillRepo, EmailService emailService, SmsService smsService, JobEventProducer jobEventProducer){
         this.jobRepo = jobRepo;
         this.userService = userService;
         this.applicationRepo = applicationRepo;
@@ -36,6 +38,7 @@ public class JobService {
         this.skillRepo = skillRepo;
         this.emailService = emailService;
         this.smsService = smsService;
+        this.jobEventProducer = jobEventProducer;
     }
 
     public Job findJob(Long jobId) {
@@ -152,15 +155,34 @@ public class JobService {
         job.setSkills(requiredJobSkills);
 
         List<User> matchingUsers = userService.findMatchingUsers(requiredJobSkills);
-        sendEmail(matchingUsers, job);
-        sendSMS(matchingUsers, job);
+        jobRepo.save(job);
 
-        return jobRepo.save(job);
+        JobEvent jobEvent = getJobEvent(matchingUsers, job);
+
+        jobEventProducer.publishJobCreatedEvent(jobEvent);
+
+        return job;
     }
 
-    public void sendEmail(List<User> userList, Job job){
-        emailService.sendMail(userList, job);
+    private static JobEvent getJobEvent(List<User> matchingUsers, Job job) {
+        List<JobEvent.UserToNotify> userToNotifyList = new ArrayList<>();
+        for(User user : matchingUsers){
+            JobEvent.UserToNotify userToNotify = JobEvent.UserToNotify.builder()
+                    .email(user.getEmail())
+                    .phoneNumber(user.getPhoneNumber())
+                    .userName(user.getUserName())
+                    .build();
+            userToNotifyList.add(userToNotify);
+        }
 
+        JobEvent jobEvent = JobEvent.builder()
+                .jobId(job.getJobId())
+                .jobTitle(job.getJobTitle())
+                .companyName(job.getCompanyName())
+                .recruiter(job.getRecruiter())
+                .usersToNotify(userToNotifyList)
+                .build();
+        return jobEvent;
     }
 
     public Set<Skill> fetchSkills(String skills){
