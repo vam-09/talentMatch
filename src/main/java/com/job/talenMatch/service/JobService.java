@@ -25,16 +25,17 @@ public class JobService {
     private final JobSkillRepo jobSkillRepo;
     private final SkillRepo skillRepo;
     private final EmailService emailService;
-
+    private final SmsService smsService;
 
     @Autowired
-    JobService(JobRepo jobRepo, UserService userService, ApplicationRepo applicationRepo, JobSkillRepo jobSkillRepo, SkillRepo skillRepo, EmailService emailService){
+    JobService(JobRepo jobRepo, UserService userService, ApplicationRepo applicationRepo, JobSkillRepo jobSkillRepo, SkillRepo skillRepo, EmailService emailService, SmsService smsService){
         this.jobRepo = jobRepo;
         this.userService = userService;
         this.applicationRepo = applicationRepo;
         this.jobSkillRepo = jobSkillRepo;
         this.skillRepo = skillRepo;
         this.emailService = emailService;
+        this.smsService = smsService;
     }
 
     public Job findJob(Long jobId) {
@@ -152,6 +153,7 @@ public class JobService {
 
         List<User> matchingUsers = userService.findMatchingUsers(requiredJobSkills);
         sendEmail(matchingUsers, job);
+        sendSMS(matchingUsers, job);
 
         return jobRepo.save(job);
     }
@@ -168,6 +170,10 @@ public class JobService {
             skillRepo.findBySkillName(skill.trim()).ifPresent(skillSet::add);
         }
         return skillSet;
+    }
+
+    public void sendSMS(List<User> userList, Job job){
+        smsService.sendSms(userList, job);
     }
 
 
