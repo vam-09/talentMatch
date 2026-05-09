@@ -6,6 +6,7 @@ import com.job.talenMatch.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -25,8 +26,7 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String sender;
 
-    @EventListener
-    @Async
+    @KafkaListener(topics = "job-notification", groupId = "what we nedtalent-match-group-v2")
     public void sendMail(JobEvent jobEvent){
         sendMailToUsersAbtLatestMAchingJob(jobEvent);
         sendEmailToRecruiter(jobEvent);
@@ -53,6 +53,10 @@ public class EmailService {
 
     private void sendEmailToRecruiter(JobEvent jobEvent) {
         // update recruiter abt matching applicants
+        if (jobEvent.getRecruiter() == null) {
+            return;
+        }
+
         StringBuilder userDetails = new StringBuilder();
         for(JobEvent.UserToNotify user : jobEvent.getUsersToNotify()){
             userDetails.append(user.getUserName())
