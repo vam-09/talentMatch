@@ -25,19 +25,15 @@ public class JobService {
     private final ApplicationRepo applicationRepo;
     private final JobSkillRepo jobSkillRepo;
     private final SkillRepo skillRepo;
-    private final EmailService emailService;
-    private final SmsService smsService;
     private final JobEventProducer jobEventProducer;
 
     @Autowired
-    JobService(JobRepo jobRepo, UserService userService, ApplicationRepo applicationRepo, JobSkillRepo jobSkillRepo, SkillRepo skillRepo, EmailService emailService, SmsService smsService, JobEventProducer jobEventProducer){
+    JobService(JobRepo jobRepo, UserService userService, ApplicationRepo applicationRepo, JobSkillRepo jobSkillRepo, SkillRepo skillRepo, JobEventProducer jobEventProducer){
         this.jobRepo = jobRepo;
         this.userService = userService;
         this.applicationRepo = applicationRepo;
         this.jobSkillRepo = jobSkillRepo;
         this.skillRepo = skillRepo;
-        this.emailService = emailService;
-        this.smsService = smsService;
         this.jobEventProducer = jobEventProducer;
     }
 
@@ -69,24 +65,6 @@ public class JobService {
 
         return jobRepo.findJobByRecruiter(user);
     }
-//    public List<JobApplicationResponseDto> findUserJobs(String userName) {
-//        User user = userService.findUser(userName);
-//        List<JobApplicationResponseDto> userJobs = new ArrayList<>();
-//        if(user.getRole() == UserRole.APPLICANT){
-//            userJobs = getJobApplications(user.getUserName());
-//        }
-//        else{
-//            List<Job> jobs = jobRepo.findJobByRecruiter(user);
-//            for(Job job : jobs){
-//                JobApplicationResponseDto jobApplicationResponseDto = new JobApplicationResponseDto();
-//                jobApplicationResponseDto.setJob(job);
-//                jobApplicationResponseDto.setJobCreationDate(job.getCreatedAt());
-//                jobApplicationResponseDto.setJobStatus(job.getJobStatus());
-//                userJobs.add(jobApplicationResponseDto);
-//            }
-//        }
-//        return userJobs;
-//    }
 
     public List<JobApplicationResponseDto> getJobApplications(String userName) {
 
@@ -193,11 +171,6 @@ public class JobService {
         }
         return skillSet;
     }
-
-    public void sendSMS(List<User> userList, Job job){
-        smsService.sendSms(userList, job);
-    }
-
 
     public void deleteJob(Long jobId){
         jobRepo.deleteById(jobId);

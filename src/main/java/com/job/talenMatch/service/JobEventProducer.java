@@ -20,7 +20,6 @@ public class JobEventProducer {
     }
     public void publishJobCreatedEvent(JobEvent jobEvent) {
         log.info("Publishing Kafka message to topic '{}' for Job ID: {}", TOPIC, jobEvent.getJobId());
-
         kafkaTemplate.send(TOPIC, jobEvent).whenComplete((result, ex) -> {
             if (ex == null) {
                 log.info("Successfully sent message for Job ID: {} [Offset: {}]",
