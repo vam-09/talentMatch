@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Jobs - TalentMatch</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+        :root {
+            --primary-color: #007BFF;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+            --border-color: #e9ecef;
+            --bg-color: #ffffff;
+            --font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--light-gray);
+            margin: 0;
+            padding: 0;
+            color: #444;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin: 0;
+            color: var(--dark-gray);
+        }
+
+        .job-table {
+            width: 100%;
+            background: var(--bg-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-collapse: collapse;
+            overflow: visible;
+            table-layout: fixed;
+        }
+
+        .job-table th {
+            background-color: #f1f3f5;
+            text-align: left;
+            padding: 15px 20px;
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .col-job { width: 40%; }
+        .col-date { width: 30%; }
+        .col-status { width: 30%; }
+
+        .job-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            word-wrap: break-word;
+        }
+
+        .job-title {
+            font-weight: 600;
+            color: var(--dark-gray);
+            display: block;
+        }
+
+        .status-header, .date-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-icon, .sort-icon {
+            cursor: pointer;
+            color: #aaa;
+            transition: color 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .filter-icon:hover, .sort-icon:hover {
+            color: var(--primary-color);
+        }
+
+        .filter-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            border-radius: 8px;
+            z-index: 100;
+            min-width: 150px;
+            padding: 8px 0;
+            text-transform: none;
+        }
+
+        .filter-dropdown.show {
+            display: block;
+        }
+
+        .filter-option {
+            padding: 8px 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #555;
+            font-weight: 400;
+        }
+
+        .filter-option:hover { background-color: #f8f9fa; color: var(--primary-color); }
+        .filter-option.active { font-weight: 600; color: var(--primary-color); background-color: #e7f3ff; }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-open { background-color: #d4edda; color: #155724; }
+        .status-closed { background-color: #f8d7da; color: #721c24; }
+        .status-draft { background-color: #fff3cd; color: #856404; }
+        .status-filled { background-color: #cce5ff; color: #004085; }
+
+        .no-records-cell {
+            text-align: center;
+            padding: 50px !important;
+            color: #999;
+            font-style: italic;
+        }
+
+        #loading, #error-message, #no-data-initial {
+            text-align: center;
+            padding: 40px;
+            background: #fff;
+            border-radius: 12px;
+            display: none;
+        }
+
+        #loading { display: block; }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .modal-header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .close-modal {
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #aaa;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .btn-edit { background: var(--primary-color); color: white; }
+        .btn-delete { background: #dc3545; color: white; }
+        .btn-save { background: #28a745; color: white; }
+        .btn-applicants { background: rgba(19, 197, 52, 0.86); color: white; }
+        .btn-cancel { background: #6c757d; color: white; }
+        .btn:hover { opacity: 0.9; }
+
+        .job-title-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .job-title-link:hover {
+            text-decoration: underline;
+        }
+
+        .required-star { color: #dc3545; margin-left: 2px; }
+        .skills-tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .skill-chip {
+            background-color: #e7f3ff;
+            color: #007BFF;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #cce5ff;
+        }
+        .skill-chip.view-only {
+            background-color: #f1f3f5;
+            color: #495057;
+            border: 1px solid #dee2e6;
+        }
+        .remove-skill {
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+        .remove-skill:hover {
+            color: #dc3545;
+        }
+        /* Specific style for chips in view mode (no remove button) */
+        .skill-chip.view-only {
+            background-color: #f1f3f5;
+            color: #495057;
+            border: 1px solid #dee2e6;
+            padding: 4px 10px;
+            margin-right: 4px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div id="navbar-placeholder"></div>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>My Posted Jobs</h1>
+        </div>
+
+        <div id="loading">
+            <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary-color)"></i>
+            <p>Fetching your jobs...</p>
+        </div>
+
+        <div id="error-message">
+            <i class="fas fa-exclamation-circle fa-2x" style="color: #dc3545"></i>
+            <p>Failed to load jobs. Please make sure you are logged in.</p>
+        </div>
+
+        <div id="no-data-initial">
+            <i class="fas fa-folder-open fa-2x" style="color: #ccc"></i>
+            <p>You haven't posted any jobs yet.</p>
+            <a href="/job-list.html" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">View Jobs</a>
+        </div>
+
+        <table class="job-table" id="jobs-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th class="col-job">Job Title</th>
+                    <th class="col-date">
+                        <div class="date-header">
+                            Created At
+                            <i class="fas fa-sort sort-icon" id="date-sort-trigger" title="Sort by Date"></i>
+                        </div>
+                    </th>
+                    <th class="col-status">
+                        <div class="status-header">
+                            Status
+                            <i class="fas fa-filter filter-icon" id="filter-trigger" title="Filter by Status"></i>
+                            <div class="filter-dropdown" id="status-dropdown">
+                                <div class="filter-option active" data-value="ALL">All Status</div>
+                                <div class="filter-option" data-value="OPEN">Open</div>
+                                <div class="filter-option" data-value="CLOSED">Closed</div>
+                                <div class="filter-option" data-value="DRAFT">Draft</div>
+                                <div class="filter-option" data-value="FILLED">Filled</div>
+                            </div>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="jobs-body">
+                <!-- Data will be injected here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Job Detail/Edit Modal -->
+    <div class="modal-overlay" id="job-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title-text">Job Details</h2>
+                <div class="modal-header-right">
+                    <button class="btn btn-applicants" id="btn-view-applicants" style="padding: 6px 12px; font-size: 0.85rem;">View Applicants</button>
+                    <span class="close-modal" id="close-modal">&times;</span>
+                </div>
+            </div>
+            
+            <!-- View Mode -->
+            <div id="view-mode">
+                <div class="modal-grid">
+                    <p><strong>Title:</strong> <span id="view-title"></span></p>
+                    <p><strong>Company:</strong> <span id="view-company"></span></p>
+                    <p><strong>Status:</strong> <span id="view-status"></span></p>
+                    <p><strong>Location:</strong> <span id="view-location"></span></p>
+                    <p><strong>CTC:</strong> <span id="view-ctc"></span></p>
+                    <p><strong>Work Model:</strong> <span id="view-workModel"></span></p>
+                    <p><strong>Shift:</strong> <span id="view-shift"></span></p>
+                    <p><strong>Experience:</strong> <span id="view-experience"></span></p>
+                    <p><strong>Education:</strong> <span id="view-education"></span></p>
+                    <p><strong>Deadline:</strong> <span id="view-deadline"></span></p>
+                    <div class="full-width">
+                        <strong>Required Skills:</strong>
+                        <div id="view-skills-container" class="skills-tag-container"></div>
+                    </div>
+                    <div class="full-width">
+                        <strong>Description:</strong>
+                        <p id="view-description" style="white-space: pre-wrap; background: #f8f9fa; padding: 10px; border-radius: 6px;"></p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-edit" id="btn-switch-edit">Edit Details</button>
+                    <button class="btn btn-delete" id="btn-delete-job">Delete Job</button>
+                </div>
+            </div>
+
+            <!-- Edit Mode -->
+            <form id="edit-mode" style="display: none;">
+                <div class="modal-grid">
+                    <input type="hidden" id="edit-id">
+                    <div class="form-group">
+                        <label>Job Title <span class="required-star">*</span></label>
+                        <input type="text" id="edit-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Company Name <span class="required-star">*</span></label>
+                        <input type="text" id="edit-company" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="edit-status">
+                            <option value="OPEN">Open</option>
+                            <option value="CLOSED">Closed</option>
+                            <option value="DRAFT">Draft</option>
+                            <option value="FILLED">Filled</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="edit-location">
+                    </div>
+                    <div class="form-group">
+                        <label>CTC</label>
+                        <input type="text" id="edit-ctc">
+                    </div>
+                    <div class="form-group">
+                        <label>Work Model</label>
+                        <select id="edit-workModel">
+                            <option value="WFO">WFO</option>
+                            <option value="REMOTE">Remote</option>
+                            <option value="HYBRID">Hybrid</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Shift</label>
+                        <select id="edit-shift">
+                            <option value="DAY">Day</option>
+                            <option value="MORNING">Morning</option>
+                            <option value="NIGHT">Night</option>
+                            <option value="ROTATIONAL">Rotational</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Experience</label>
+                        <input type="text" id="edit-experience">
+                    </div>
+                    <div class="form-group">
+                        <label>Education</label>
+                        <input type="text" id="edit-education">
+                    </div>
+                    <div class="form-group">
+                        <label>Deadline</label>
+                        <input type="datetime-local" id="edit-deadline">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Required Skills</label>
+                        <select id="edit-skills-selector">
+                            <option value="" disabled selected>Choose a skill to add...</option>
+                        </select>
+                        <div id="selected-skills-tags" class="skills-tag-container"></div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Job Description <span class="required-star">*</span></label>
+                        <textarea id="edit-description" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" id="btn-cancel-edit">Cancel</button>
+                    <button type="submit" class="btn btn-save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        // Load Navbar
+        fetch('/navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                const placeholder = document.getElementById('navbar-placeholder');
+                placeholder.innerHTML = html;
+                const scripts = placeholder.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+            });
+
+        let allJobs = [];
+        let currentSortOrder = 'desc'; // Default newest first
+        let selectedSkillsForEdit = []; // Global state for current editing session
+
+        async function loadSkills() {
+            try {
+                const response = await fetch('/api/skills');
+                if (response.ok) {
+                    const skills = await response.json();
+                    const select = document.getElementById('edit-skills-selector');
+                    select.innerHTML = '<option value="" disabled selected>Choose a skill to add...</option>';
+                    
+                    skills.forEach(skill => {
+                        const option = document.createElement('option');
+                        option.value = skill.skillName;
+                        option.textContent = skill.skillName;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading skills:', error);
+            }
+        }
+
+        async function fetchMyJobs() {
+            try {
+                const response = await fetch('/api/userJobs');
+                if (!response.ok) {
+                    if (response.status === 401) { window.location.href = '/login.html'; return; }
+                    throw new Error('Failed to fetch');
+                }
+
+                allJobs = await response.json();
+                document.getElementById('loading').style.display = 'none';
+
+                if (!allJobs || allJobs.length === 0) {
+                    document.getElementById('no-data-initial').style.display = 'block';
+                    return;
+                }
+
+                document.getElementById('jobs-table').style.display = 'table';
+
+                await loadSkills();
+                filterJobs(); // This will call displayJobs
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error-message').style.display = 'block';
+            }
+        }
+
+        let currentJob = null;
+
+        function displayJobs(jobs) {
+            const body = document.getElementById('jobs-body');
+            body.innerHTML = '';
+
+            if (jobs.length === 0) {
+                body.innerHTML = `<tr><td colspan="3" class="no-records-cell">No jobs found matching this status.</td></tr>`;
+                return;
+            }
+
+            jobs.forEach(job => {
+                const row = document.createElement('tr');
+                const status = job.jobStatus || 'OPEN';
+                const statusClass = 'status-' + String(status).toLowerCase();
+
+                const jobDate = job.createdAt;
+                const formattedDate = jobDate ? new Date(jobDate).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'short', day: 'numeric'
+                }) : 'N/A';
+
+                row.innerHTML = `
+                    <td>
+                        <a class="job-title job-title-link" onclick="openJobDetails(${job.jobId})">${job.jobTitle || 'Unknown Position'}</a>
+                    </td>
+                    <td>${formattedDate}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${status}</span>
+                    </td>
+                `;
+                body.appendChild(row);
+            });
+        }
+
+        // --- Modal Logic ---
+        const modal = document.getElementById('job-modal');
+        const viewMode = document.getElementById('view-mode');
+        const editMode = document.getElementById('edit-mode');
+
+        function openJobDetails(jobId) {
+            currentJob = allJobs.find(j => j.jobId === jobId);
+            if (!currentJob) return;
+
+            document.getElementById('view-title').innerText = currentJob.jobTitle;
+            document.getElementById('view-company').innerText = currentJob.companyName || 'N/A';
+            document.getElementById('view-status').innerText = currentJob.jobStatus || 'OPEN';
+            document.getElementById('view-location').innerText = currentJob.location || 'N/A';
+            document.getElementById('view-ctc').innerText = currentJob.ctc || 'N/A';
+            document.getElementById('view-workModel').innerText = currentJob.workModel || 'N/A';
+            document.getElementById('view-shift').innerText = currentJob.shift || 'N/A';
+            document.getElementById('view-experience').innerText = currentJob.experience || 'N/A';
+            document.getElementById('view-education').innerText = currentJob.educationRequirement || 'N/A';
+            document.getElementById('view-deadline').innerText = currentJob.applicationDeadline ? new Date(currentJob.applicationDeadline).toLocaleString() : 'N/A';
+            
+            // Render skills as chips in view mode
+            const viewSkillsContainer = document.getElementById('view-skills-container');
+            viewSkillsContainer.innerHTML = '';
+            if (currentJob.requiredSkills) {
+                currentJob.requiredSkills.split(',').forEach(skill => {
+                    const trimmed = skill.trim();
+                    if (trimmed) {
+                        const chip = document.createElement('span');
+                        chip.className = 'skill-chip view-only';
+                        chip.innerText = trimmed;
+                        viewSkillsContainer.appendChild(chip);
+                    }
+                });
+            } else {
+                viewSkillsContainer.innerHTML = '<span style="color: #999; font-style: italic;">No skills specified</span>';
+            }
+
+            document.getElementById('view-description').innerText = currentJob.jobDescription || 'N/A';
+            
+            switchToView();
+            modal.style.display = 'flex';
+        }
+
+        function switchToView() {
+            viewMode.style.display = 'block';
+            editMode.style.display = 'none';
+            document.getElementById('modal-title-text').innerText = "Job Details";
+            document.getElementById('btn-view-applicants').style.display = 'block';
+        }
+
+        function switchToEdit() {
+            viewMode.style.display = 'none';
+            editMode.style.display = 'block';
+            document.getElementById('modal-title-text').innerText = "Edit Job";
+            document.getElementById('btn-view-applicants').style.display = 'none';
+            
+            document.getElementById('edit-id').value = currentJob.jobId;
+            document.getElementById('edit-title').value = currentJob.jobTitle;
+            document.getElementById('edit-company').value = currentJob.companyName || '';
+            document.getElementById('edit-status').value = currentJob.jobStatus || 'OPEN';
+            document.getElementById('edit-location').value = currentJob.location || '';
+            document.getElementById('edit-ctc').value = currentJob.ctc || '';
+            document.getElementById('edit-workModel').value = currentJob.workModel || 'WFO';
+            document.getElementById('edit-shift').value = currentJob.shift || 'DAY';
+            document.getElementById('edit-experience').value = currentJob.experience || '';
+            document.getElementById('edit-education').value = currentJob.educationRequirement || '';
+            
+            // Initialize Skills Tags
+            selectedSkillsForEdit = currentJob.requiredSkills 
+                ? currentJob.requiredSkills.split(',').map(s => s.trim()).filter(s => s !== "") 
+                : [];
+            renderSelectedSkills();
+
+            document.getElementById('edit-description').value = currentJob.jobDescription || '';
+            
+            if(currentJob.applicationDeadline) {
+                document.getElementById('edit-deadline').value = new Date(currentJob.applicationDeadline).toISOString().slice(0, 16);
+            }
+        }
+
+        // Handle adding skills from dropdown
+        document.getElementById('edit-skills-selector').addEventListener('change', function(e) {
+            const skillName = e.target.value;
+            if (skillName && !selectedSkillsForEdit.includes(skillName)) {
+                selectedSkillsForEdit.push(skillName);
+                renderSelectedSkills();
+            }
+            this.value = ""; // Reset dropdown to placeholder
+        });
+
+        function renderSelectedSkills() {
+            const container = document.getElementById('selected-skills-tags');
+            container.innerHTML = '';
+            
+            selectedSkillsForEdit.forEach(skill => {
+                const chip = document.createElement('div');
+                chip.className = 'skill-chip';
+                chip.innerHTML = `
+                    ${skill}
+                    <span class="remove-skill" onclick="removeSkillFromEdit('${skill}')">&times;</span>
+                `;
+                container.appendChild(chip);
+            });
+        }
+
+        window.removeSkillFromEdit = function(skillName) {
+            selectedSkillsForEdit = selectedSkillsForEdit.filter(s => s !== skillName);
+            renderSelectedSkills();
+        };
+
+        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+        document.getElementById('btn-switch-edit').onclick = switchToEdit;
+        document.getElementById('btn-cancel-edit').onclick = switchToView;
+        document.getElementById('btn-view-applicants').onclick = () => {
+            window.location.href = `/job-applicants.html?jobId=${currentJob.jobId}`;
+        };
+
+        // Update Job
+        editMode.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const updatedJob = {
+                ...currentJob,
+                jobId: document.getElementById('edit-id').value,
+                jobTitle: document.getElementById('edit-title').value,
+                companyName: document.getElementById('edit-company').value,
+                jobStatus: document.getElementById('edit-status').value,
+                location: document.getElementById('edit-location').value,
+                ctc: document.getElementById('edit-ctc').value,
+                workModel: document.getElementById('edit-workModel').value,
+                shift: document.getElementById('edit-shift').value,
+                experience: document.getElementById('edit-experience').value,
+                educationRequirement: document.getElementById('edit-education').value,
+                requiredSkills: selectedSkillsForEdit.join(', '),
+                jobDescription: document.getElementById('edit-description').value,
+                applicationDeadline: document.getElementById('edit-deadline').value ? new Date(document.getElementById('edit-deadline').value).toISOString() : null
+            };
+
+            try {
+                const response = await fetch('/api/job/update', {
+                    method: 'POST', // Assuming POST based on common patterns, change to PUT if needed
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedJob)
+                });
+
+                if (response.ok) {
+                    alert('Job updated successfully!');
+                    modal.style.display = 'none';
+                    fetchMyJobs(); // Refresh list
+                } else {
+                    alert('Failed to update job.');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        // Delete Job
+        document.getElementById('btn-delete-job').onclick = async () => {
+            if (!confirm('Are you sure you want to delete this job?')) return;
+            
+            const response = await fetch(`/api/job/delete?id=${currentJob.jobId}`, { method: 'DELETE' });
+            if (response.ok) {
+                alert('Job deleted.');
+                modal.style.display = 'none';
+                fetchMyJobs();
+            } else {
+                alert('Failed to delete job.');
+            }
+        }
+
+        // --- Filter Logic ---
+        const filterTrigger = document.getElementById('filter-trigger');
+        const statusDropdown = document.getElementById('status-dropdown');
+
+        filterTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            statusDropdown.classList.toggle('show');
+        });
+
+        document.querySelectorAll('.filter-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                filterJobs();
+                statusDropdown.classList.remove('show');
+            });
+        });
+
+        function filterJobs() {
+            const activeOption = document.querySelector('.filter-option.active');
+            const selectedStatus = activeOption ? activeOption.getAttribute('data-value') : 'ALL';
+
+            if (selectedStatus === 'ALL') {
+                displayJobs(allJobs);
+            } else {
+                const filtered = allJobs.filter(job => {
+                    const status = job.jobStatus || 'OPEN';
+                    return status.toUpperCase() === selectedStatus;
+                });
+                displayJobs(filtered);
+            }
+        }
+
+        // --- Sort Logic ---
+        const sortTrigger = document.getElementById('date-sort-trigger');
+        sortTrigger.addEventListener('click', () => {
+            currentSortOrder = currentSortOrder === 'desc' ? 'asc' : 'desc';
+            sortData(currentSortOrder);
+            filterJobs(); // Re-render with current filter
+
+            // Update Icon
+            sortTrigger.className = currentSortOrder === 'desc' ? 'fas fa-sort-amount-down sort-icon' : 'fas fa-sort-amount-up sort-icon';
+        });
+
+        function sortData(order) {
+            allJobs.sort((a, b) => {
+                const dateA = new Date(a.createdAt || 0);
+                const dateB = new Date(b.createdAt || 0);
+                return order === 'desc' ? dateB - dateA : dateA - dateB;
+            });
+        }
+
+        window.addEventListener('click', () => {
+            statusDropdown.classList.remove('show');
+        });
+
+        document.addEventListener('DOMContentLoaded', fetchMyJobs);
+    </script>
+</body>
+</html>

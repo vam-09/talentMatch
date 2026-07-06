@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications - TalentMatch</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+        :root {
+            --primary-color: #007BFF;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+            --border-color: #e9ecef;
+            --bg-color: #ffffff;
+            --font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--light-gray);
+            margin: 0;
+            padding: 0;
+            color: #444;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin: 0;
+            color: var(--dark-gray);
+        }
+
+        .applications-table {
+            width: 100%;
+            background: var(--bg-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-collapse: collapse;
+            overflow: visible;
+            table-layout: fixed;
+        }
+
+        .applications-table th {
+            background-color: #f1f3f5;
+            text-align: left;
+            padding: 15px 20px;
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .col-job { width: 40%; }
+        .col-date { width: 30%; }
+        .col-status { width: 30%; }
+
+        .applications-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            word-wrap: break-word;
+        }
+
+        .job-title {
+            font-weight: 600;
+            color: var(--dark-gray);
+            display: block;
+        }
+
+        .company-name {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .status-header, .date-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-icon, .sort-icon {
+            cursor: pointer;
+            color: #aaa;
+            transition: color 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .filter-icon:hover, .sort-icon:hover {
+            color: var(--primary-color);
+        }
+
+        .filter-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            border-radius: 8px;
+            z-index: 100;
+            min-width: 150px;
+            padding: 8px 0;
+            text-transform: none;
+        }
+
+        .filter-dropdown.show {
+            display: block;
+        }
+
+        .filter-option {
+            padding: 8px 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #555;
+            font-weight: 400;
+        }
+
+        .filter-option:hover { background-color: #f8f9fa; color: var(--primary-color); }
+        .filter-option.active { font-weight: 600; color: var(--primary-color); background-color: #e7f3ff; }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-accepted { background-color: #d4edda; color: #155724; }
+        .status-rejected { background-color: #f8d7da; color: #721c24; }
+        .status-interview { background-color: #cce5ff; color: #004085; }
+        .status-null { background-color: #e9ecef; color: #6c757d; }
+
+        .no-records-cell {
+            text-align: center;
+            padding: 50px !important;
+            color: #999;
+            font-style: italic;
+        }
+
+        #loading, #error-message, #no-data-initial {
+            text-align: center;
+            padding: 40px;
+            background: #fff;
+            border-radius: 12px;
+            display: none;
+        }
+        .job-title-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .job-title-link:hover{
+            text-decoration: underline;
+        }
+
+
+        #loading { display: block; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div id="navbar-placeholder"></div>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>My Applications</h1>
+        </div>
+
+        <div id="loading">
+            <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary-color)"></i>
+            <p>Fetching your applications...</p>
+        </div>
+
+        <div id="error-message">
+            <i class="fas fa-exclamation-circle fa-2x" style="color: #dc3545"></i>
+            <p>Failed to load applications. Please make sure you are logged in.</p>
+        </div>
+
+        <div id="no-data-initial">
+            <i class="fas fa-folder-open fa-2x" style="color: #ccc"></i>
+            <p>You haven't applied for any jobs yet.</p>
+            <a href="/job-list.html" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">Browse Jobs</a>
+        </div>
+
+        <table class="applications-table" id="apps-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th class="col-job">Job Role</th>
+                    <th class="col-date">
+                        <div class="date-header">
+                            Date Applied
+                            <i class="fas fa-sort sort-icon" id="date-sort-trigger" title="Sort by Date"></i>
+                        </div>
+                    </th>
+                    <th class="col-status">
+                        <div class="status-header">
+                            Status
+                            <i class="fas fa-filter filter-icon" id="filter-trigger" title="Filter by Status"></i>
+                            <div class="filter-dropdown" id="status-dropdown">
+                                <div class="filter-option active" data-value="ALL">All Status</div>
+                                <div class="filter-option" data-value="PENDING">Pending</div>
+                                <div class="filter-option" data-value="ACCEPTED">Accepted</div>
+                                <div class="filter-option" data-value="REJECTED">Rejected</div>
+                                <div class="filter-option" data-value="INTERVIEW">Interview</div>
+                            </div>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="apps-body">
+                <!-- Data will be injected here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Load Navbar
+        fetch('/navbar.html')
+            .then(response => response.text())
+            .then(html => {
+                const placeholder = document.getElementById('navbar-placeholder');
+                placeholder.innerHTML = html;
+                const scripts = placeholder.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+            });
+
+        let allApplications = [];
+        let currentSortOrder = 'desc'; // Default newest first
+
+        async function fetchMyApplications() {
+            try {
+                const response = await fetch('/api/userApplications');
+                if (!response.ok) {
+                    if (response.status === 401) { window.location.href = '/login.html'; return; }
+                    throw new Error('Failed to fetch');
+                }
+
+                allApplications = await response.json();
+                document.getElementById('loading').style.display = 'none';
+
+                if (!allApplications || allApplications.length === 0) {
+                    document.getElementById('no-data-initial').style.display = 'block';
+                    return;
+                }
+
+                document.getElementById('apps-table').style.display = 'table';
+
+                // Initial Sort (Descending by Date)
+                sortData('desc');
+                filterApplications(); // This will call displayApplications
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error-message').style.display = 'block';
+            }
+        }
+
+        function displayApplications(apps) {
+            const body = document.getElementById('apps-body');
+            body.innerHTML = '';
+
+            if (apps.length === 0) {
+                body.innerHTML = `<tr><td colspan="3" class="no-records-cell">No applications found matching this status.</td></tr>`;
+                return;
+            }
+
+            apps.forEach(app => {
+                const row = document.createElement('tr');
+                const job = app.job || {};
+                const status = app.status || 'PENDING';
+                const statusClass = 'status-' + String(status).toLowerCase();
+
+                const appDate = app.applicationDate;
+                const formattedDate = appDate ? new Date(appDate).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'short', day: 'numeric'
+                }) : 'N/A';
+
+                row.innerHTML = `
+                    <td>
+                        <a href="/job-details.html?jobId=${job.jobId || ''}" class="job-title job-title-link">
+                            ${job.jobTitle || 'Unknown Position'}
+                        </a>
+                        <span class="company-name">${job.companyName || 'Unknown Company'}</span>
+                    </td>
+                    <td>${formattedDate}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${status}</span>
+                    </td>
+                `;
+                body.appendChild(row);
+            });
+        }
+
+        // --- Filter Logic ---
+        const filterTrigger = document.getElementById('filter-trigger');
+        const statusDropdown = document.getElementById('status-dropdown');
+
+        filterTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            statusDropdown.classList.toggle('show');
+        });
+
+        document.querySelectorAll('.filter-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                filterApplications();
+                statusDropdown.classList.remove('show');
+            });
+        });
+
+        function filterApplications() {
+            const activeOption = document.querySelector('.filter-option.active');
+            const selectedStatus = activeOption ? activeOption.getAttribute('data-value') : 'ALL';
+
+            if (selectedStatus === 'ALL') {
+                displayApplications(allApplications);
+            } else {
+                const filtered = allApplications.filter(app => {
+                    const status = app.applicationStatus || 'PENDING';
+                    return status.toUpperCase() === selectedStatus;
+                });
+                displayApplications(filtered);
+            }
+        }
+
+        // --- Sort Logic ---
+        const sortTrigger = document.getElementById('date-sort-trigger');
+        sortTrigger.addEventListener('click', () => {
+            currentSortOrder = currentSortOrder === 'desc' ? 'asc' : 'desc';
+            sortData(currentSortOrder);
+            filterApplications(); // Re-render with current filter
+
+            // Update Icon
+            sortTrigger.className = currentSortOrder === 'desc' ? 'fas fa-sort-amount-down sort-icon' : 'fas fa-sort-amount-up sort-icon';
+        });
+
+        function sortData(order) {
+            allApplications.sort((a, b) => {
+                const dateA = new Date(a.applicationDate || (a.job ? a.job.createdAt : 0));
+                const dateB = new Date(b.applicationDate || (b.job ? b.job.createdAt : 0));
+                return order === 'desc' ? dateB - dateA : dateA - dateB;
+            });
+        }
+
+        window.addEventListener('click', () => {
+            statusDropdown.classList.remove('show');
+        });
+
+        document.addEventListener('DOMContentLoaded', fetchMyApplications);
+    </script>
+</body>
+</html>

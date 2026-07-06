@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Applicants - TalentMatch</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+        :root {
+            --primary-color: #007BFF;
+            --bg-color: #f4f7f6;
+            --font-family: 'Poppins', sans-serif;
+        }
+        body { font-family: var(--font-family); background-color: var(--bg-color); margin: 0; }
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .job-header {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .job-info h1 { margin: 0; font-size: 1.5rem; color: #333; }
+        .job-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: #e7f3ff;
+            color: var(--primary-color);
+        }
+
+        .applicants-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; padding: 15px; border-bottom: 2px solid #eee; color: #666; font-weight: 500; }
+        td { padding: 15px; border-bottom: 1px solid #eee; color: #444; }
+        .no-data { text-align: center; padding: 40px; color: #999; }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: #eee;
+        }
+
+        /* Skill Chip Styles */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .skill-chip {
+            background-color: #e7f3ff;
+            color: var(--primary-color);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid #cce5ff;
+            white-space: nowrap;
+        }
+        .applicant-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .applicant-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Filter Styles */
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+        .filter-icon {
+            cursor: pointer;
+            color: #aaa;
+            transition: color 0.2s;
+            font-size: 0.8rem;
+        }
+        .filter-icon:hover {
+            color: var(--primary-color);
+        }
+        .filter-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #eee;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            border-radius: 8px;
+            z-index: 100;
+            min-width: 150px;
+            padding: 8px 0;
+        }
+        .filter-dropdown.show {
+            display: block;
+        }
+        .filter-option {
+            padding: 8px 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #555;
+        }
+        .filter-option:hover { background-color: #f8f9fa; color: var(--primary-color); }
+        .filter-option.active { font-weight: 600; color: var(--primary-color); background-color: #e7f3ff; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div id="navbar-placeholder"></div>
+
+<div class="container">
+    <div class="job-header">
+        <div class="job-info">
+            <h1 id="job-title-display">Loading Job...</h1>
+            <p style="margin: 5px 0 0; color: #888;">Applicants Management</p>
+        </div>
+        <div class="job-status" id="job-status-display">---</div>
+    </div>
+
+    <div class="applicants-card">
+        <table id="applicants-table" style="display: none;">
+            <thead>
+            <tr>
+                <th>Applicant Name</th>
+                <th>Email</th>
+                <th>Skills</th>
+                <th>Application Date</th>
+                <th>
+                    <div class="status-header">
+                        Status
+                        <i class="fas fa-filter filter-icon" id="filter-trigger"></i>
+                        <div class="filter-dropdown" id="status-dropdown">
+                            <div class="filter-option active" data-value="ALL">All</div>
+                            <div class="filter-option" data-value="PENDING">Pending</div>
+                            <div class="filter-option" data-value="ACCEPTED">Accepted</div>
+                            <div class="filter-option" data-value="REJECTED">Rejected</div>
+                        </div>
+                    </div>
+                </th>
+            </tr>
+            </thead>
+            <tbody id="applicants-body"></tbody>
+        </table>
+        <div id="no-applicants" class="no-data">
+            <i class="fas fa-users-slash" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i>
+            No applications received yet for this position.
+        </div>
+    </div>
+</div>
+
+<script>
+    let allApplicants = [];
+
+    async function initPage() {
+        const navResponse = await fetch('/navbar.html');
+        const navHtml = await navResponse.text();
+        const placeholder = document.getElementById('navbar-placeholder');
+        placeholder.innerHTML = navHtml;
+
+        placeholder.querySelectorAll('script').forEach(oldScript => {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+
+        // Get Job ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const jobId = urlParams.get('jobId');
+
+        if (!jobId) {
+            alert("No Job ID provided.");
+            return;
+        }
+
+        await fetchApplicants(jobId);
+
+        window.onclick = () => {
+            document.getElementById('status-dropdown').classList.remove('show');
+        };
+    }
+
+    async function fetchApplicants(jobId) {
+        try {
+            const response = await fetch(`/api/jobSpecificApplications?jobId=${jobId}`);
+            if (response.ok) {
+                allApplicants = await response.json();
+                displayApplicants(allApplicants);
+                setupFilterLogic();
+            }
+        } catch (err) {
+            console.error("Error fetching applications:", err);
+        }
+    }
+
+    function setupFilterLogic() {
+        const trigger = document.getElementById('filter-trigger');
+        const dropdown = document.getElementById('status-dropdown');
+
+        trigger.onclick = (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        };
+
+        document.querySelectorAll('.filter-option').forEach(option => {
+            option.onclick = function() {
+                document.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                
+                const val = this.getAttribute('data-value');
+                const filtered = val === 'ALL' 
+                    ? allApplicants 
+                    : allApplicants.filter(app => (app.applicationStatus || 'PENDING') === val);
+                displayApplicants(filtered);
+            };
+        });
+    }
+
+    function displayApplicants(apps) {
+        if (apps.length > 0) {
+            // Set Job Header from first application object
+            document.getElementById('job-title-display').innerText = apps[0].job?.jobTitle || "Job Position";
+            document.getElementById('job-status-display').innerText = apps[0].job?.jobStatus || "OPEN";
+
+            const body = document.getElementById('applicants-body');
+            document.getElementById('applicants-table').style.display = 'table';
+            document.getElementById('no-applicants').style.display = 'none';
+
+            body.innerHTML = apps.map(app => `
+                    <tr>
+                         <td>
+                             <a href="user-details.html?userName=${app.applicant?.userName}" class="applicant-link">
+                                 ${app.applicant?.firstName || 'User'} ${app.applicant?.lastName || 'User'}
+                             </a>
+                         </td>                        <td>${app.applicant?.email || 'N/A'}</td>
+                        <td>
+                            <div class="skills-container">
+                                ${app.applicant?.skills?.map(skill => `<span class="skill-chip">${skill.skillName}</span>`).join('') || 'N/A'}
+                            </div>
+                        </td>
+                        <td>${new Date(app.applicationDate).toLocaleDateString()}</td>
+                        <td><span class="status-badge">${app.applicationStatus || 'PENDING'}</span></td>
+                    </tr>
+                `).join('');
+        } else {
+            document.getElementById('applicants-table').style.display = 'none';
+            document.getElementById('no-applicants').style.display = 'block';
+            // If we filtered and found nothing, change the text slightly
+            if (allApplicants.length > 0) {
+                document.getElementById('no-applicants').innerHTML = '<i class="fas fa-search" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i> No applicants found with this status.';
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initPage);
+</script>
+</body>
+</html>
