@@ -37,22 +37,21 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/static/**").permitAll()
-                .requestMatchers("/api/register", "/login", "/api/skills").permitAll()
+                .requestMatchers("/api/register", "/registration.html", "/login.html", "/login", "/api/skills").permitAll()
                 .anyRequest().authenticated()
             )
             .httpBasic(withDefaults())
             .formLogin(form -> form
-                .loginPage("/static/login.html") // Use custom login page, this is where user will directed
+                .loginPage("/login.html") // Use custom login page, this is where user will directed
                 .loginProcessingUrl("/login") // URL to submit the login form, once user clicks on login button. post req will be sent to /login url.You don't actually write a controller for this /login URL.
                     // Spring Security's filters "catch" it automatically.
                 .defaultSuccessUrl("/api/allJobs", true)
-                .failureUrl("/static/login.html?error=true") // Redirect here on failure
+                .failureUrl("/login.html?error=true") // Redirect here on failure
                 .permitAll()
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/static/login.html?logout=true")
+                .logoutSuccessUrl("/login.html?logout=true")
                 .permitAll()
             );
 
