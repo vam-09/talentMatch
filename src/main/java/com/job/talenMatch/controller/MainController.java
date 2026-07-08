@@ -61,7 +61,7 @@ public class MainController {
 
     @GetMapping("/register")
     public String register(){
-        return "forward:/static/registration.html";
+        return "forward:/registration.html";
     }
 
     @GetMapping("/user/me")
